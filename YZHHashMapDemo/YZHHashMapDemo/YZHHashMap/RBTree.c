@@ -58,33 +58,50 @@
 #define IS_BLACK_NODE(PTR_NODE)     (!IS_RED_NODE(PTR_NODE))
 #define IS_NON_NULL_BLACK_NODE(PTR_NODE)    (PTR_NODE && PTR_NODE->color = BLACK)
 
-static RBTreeNodeComparisonResult_E defaultRBTreeCompare(struct RBTreeNode *first,struct RBTreeNode *second)
+static RBTreeNode_S *defaultRBTreeNodeAlloc()
 {
-    if (first->key < second->key) {
-        return ASC;
-    }
-    else if (first->key == second->key) {
-        return SAME;
-    }
-    else {
-        return DESC;
+    RBTreeNode_S *treeNode = calloc(1, sizeof(RBTreeNode_S));
+    return treeNode;
+}
+
+static void defaultRBTreeNodeFree(struct RBTree *tree, RBTreeNode_S *node)
+{
+    if (node) {
+        free(node);
     }
 }
 
-static void defaultCopyValue(RBTreeNode_S *src, RBTreeNode_S *dst)
+static RBTreeNodeComparisonResult_E defaultRBTreeCompare(struct RBTree *tree, struct RBTreeNode *first,struct RBTreeNode *second)
+{
+    if (first->key < second->key) {
+        return YZHOrderedASC;// ASC;
+    }
+    else if (first->key == second->key) {
+        return YZHOrderedEQ;//SAME;
+    }
+    else {
+        return YZHOrderedDES;//DESC;
+    }
+}
+
+static void defaultCopyValue(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S *dst)
 {
     if (src == NULL || dst == NULL) {
         return;
     }
+    dst->key = src->key;
     dst->value = src->value;
+    dst->userInfo = src->userInfo;
 }
 
-static void defaultSwapValue(RBTreeNode_S *first, RBTreeNode_S *second)
+static void defaultSwapValue(struct RBTree *tree, RBTreeNode_S *first, RBTreeNode_S *second)
 {
     if (first == NULL || second == NULL) {
         return;
     }
-    int64_t r = INTEGER_SWAP(first->key, second->key);
+    INTEGER_SWAP(first->key, second->key);
+    PTR_SWAP(first->value, second->value);
+    PTR_SWAP(first->userInfo, second->userInfo);
 }
 
 inline static RBTreeNode_S *loopupInsertNode(struct RBTree *tree, struct RBTreeNode *node, int8_t condition)
@@ -94,11 +111,11 @@ inline static RBTreeNode_S *loopupInsertNode(struct RBTree *tree, struct RBTreeN
     }
     struct RBTreeNode *cur = tree->root;
     while (cur) {
-        RBTreeNodeComparisonResult_E result = tree->compare(node,cur);
-        if (result == SAME) {
+        RBTreeNodeComparisonResult_E result = tree->compare(tree, node, cur);
+        if (result == YZHOrderedEQ) {
             return cur;
         }
-        else if (result == ASC) {
+        else if (result == YZHOrderedASC) {
             if (cur->left) {
                 cur = cur->left;
             }
@@ -106,7 +123,7 @@ inline static RBTreeNode_S *loopupInsertNode(struct RBTree *tree, struct RBTreeN
                 return condition ? NULL : cur;
             }
         }
-        else if (result == DESC) {
+        else if (result == YZHOrderedDES) {
             if (cur->right) {
                 cur = cur->right;
             }
@@ -148,6 +165,12 @@ inline static RBTreeNode_S *loopupNearNode(struct RBTreeNode *node, uint8_t next
 
 inline static void checkRBTree(struct RBTree *tree)
 {
+    if (!tree->alloc) {
+        tree->alloc = defaultRBTreeNodeAlloc;
+    }
+    if (!tree->free) {
+        tree->free = defaultRBTreeNodeFree;
+    }
     if (!tree->compare) {
         tree->compare = defaultRBTreeCompare;
     }
@@ -176,33 +199,38 @@ inline static void deleteRedLeafNode(struct RBTreeNode *redNode)
 }
 
 
-void insertRBTree(struct RBTree *tree, struct RBTreeNode *node)
+int8_t insertRBTree(struct RBTree *tree, struct RBTreeNode *node)
 {
     if (tree == NULL || node == NULL) {
-        return;
+        return 0;
     }
     checkRBTree(tree);
+    node->parent = NULL;
+    node->left = NULL;
+    node->right = NULL;
 
     //1、如果是根节点，把修改为黑色，直接返回
     if (tree->root == NULL) {
         tree->root = node;
         node->color = BLACK;
         ++tree->count;
-        return;
+        return 1;
     }
     
     node->color = RED;
     RBTreeNode_S *parent = loopupInsertNode(tree, node, 0);
     if (!parent) {
-        return;
+        //这里就返回失败
+        return 0;
     }
-    RBTreeNodeComparisonResult_E result = tree->compare(node,parent);
-    if (result == ASC) {
+    //这里返回成功
+    RBTreeNodeComparisonResult_E result = tree->compare(tree, node, parent);
+    if (result == YZHOrderedASC) {
         parent->left = node;
         node->parent = parent;
     }
-    else if (result == SAME) {
-        tree->copy(node,parent);
+    else if (result == YZHOrderedEQ) {
+        tree->copy(tree, node, parent);
     }
     else {
         parent->right = node;
@@ -211,7 +239,7 @@ void insertRBTree(struct RBTree *tree, struct RBTreeNode *node)
     ++tree->count;
     //2、如果父节点是黑色,直接返回
     if (IS_BLACK_NODE(parent)) {
-        return;
+        return 1;
     }
     
     RBTreeNode_S *uncle = NODE_BROTHER(parent);
@@ -308,20 +336,18 @@ void insertRBTree(struct RBTree *tree, struct RBTreeNode *node)
     }
     
     tree->root->color = BLACK;
+    return 1;
 }
 
 
-void deleteRBTree(struct RBTree *tree, struct RBTreeNode *node)
+RBTreeNode_S * deleteRBTree(struct RBTree *tree, struct RBTreeNode *node)
 {
     if (tree == NULL || tree->root == NULL || node == NULL) {
-        return;
+        return NULL;
     }
     checkRBTree(tree);
 
     struct RBTreeNode *delete = loopupInsertNode(tree, node, 1);
-//    if (delete->key != node->key) {
-//        printf("\n========查找的是什么东东:node.key=%lld,deleteKey=%lld",node->key,delete->key);
-//    }
     
     //是红色节点，没有叶子节点
     if (IS_RED_NODE(delete)) {
@@ -333,20 +359,20 @@ void deleteRBTree(struct RBTree *tree, struct RBTreeNode *node)
         }
         else if (delete->left == NULL && delete->right == NULL) {
             deleteRedLeafNode(delete);
-            tree->release(delete);
+            tree->free(tree, delete);
             --tree->count;
-            return;            
+            return delete;
         }
     }
     //如果是根节点
     else if (delete == tree->root && delete->left == NULL && delete->right == NULL) {
-        tree->release(delete);
+        tree->free(tree, delete);
         tree->root = NULL;
         --tree->count;
-//        if (tree->count != 0) {
-//            printf("出现严重的错误了，需要检查算法");
-//        }
-        return;
+        if (tree->count != 0) {
+            printf("出现严重的错误了，需要检查算法");
+        }
+        return delete;
     }
     
     RBTreeNode_S *nearNode = NULL;
@@ -388,18 +414,17 @@ void deleteRBTree(struct RBTree *tree, struct RBTreeNode *node)
     if (nearNode == NULL) {
         nearNode = delete;
     }
-//    printf("\ndelete=%lld,node=%lld,near=%lld\n",delete->key,node->key,nearNode->key);
     /*
      *将后继节点和删除节点的值进行交换,真正需要删除的是nearNode，nearNode存放着实际要删除的内容
      *nearNode需要先调整
      */
     if (nearNode != delete) {
-        tree->swap(nearNode, delete);
+        tree->swap(tree, nearNode, delete);
     }
     if (IS_RED_NODE(nearNode)) {
         //只有红色叶子节点一种情况,直接进行删除
         deleteRedLeafNode(nearNode);
-        tree->release(nearNode);
+        tree->free(tree, nearNode);
     }
     else {
         //因为没有黑色的nil节点，所以先对nearNode进行调整
@@ -543,21 +568,22 @@ void deleteRBTree(struct RBTree *tree, struct RBTreeNode *node)
             }
         }
         //删除nearNode节点
-        tree->release(nearNode);
+        tree->free(tree, nearNode);
     }
     --tree->count;
+    return nearNode;
 }
 
 
-struct RBTreeNode *selectRBTree(struct RBTree *tree, struct RBTreeNode *node)
+RBTreeNode_S *selectRBTree(struct RBTree *tree, struct RBTreeNode *node)
 {
     RBTreeNode_S *find = loopupInsertNode(tree, node, 1);
     return find;
 }
 
-struct RBTreeNode *insertRBTreeWithKey(struct RBTree *tree, int64_t key)
+RBTreeNode_S *insertRBTreeWithKey(struct RBTree *tree, int64_t key)
 {
-    RBTreeNode_S *insert = calloc(1, sizeof(RBTreeNode_S));
+    RBTreeNode_S *insert = tree->alloc();
     if (insert) {
         insert->key = key;
         insertRBTree(tree, insert);
@@ -565,15 +591,15 @@ struct RBTreeNode *insertRBTreeWithKey(struct RBTree *tree, int64_t key)
     return insert;
 }
 
-void deleteRBTreeWithKey(struct RBTree *tree, int64_t key)
+RBTreeNode_S *deleteRBTreeWithKey(struct RBTree *tree, int64_t key)
 {
     RBTreeNode_S node;
     memset(&node, 0, sizeof(RBTreeNode_S));
     node.key = key;
-    deleteRBTree(tree, &node);
+    return deleteRBTree(tree, &node);
 }
 
-struct RBTreeNode *selectRBTreeWithKey(struct RBTree *tree, int64_t key)
+RBTreeNode_S *selectRBTreeWithKey(struct RBTree *tree, int64_t key)
 {
     RBTreeNode_S node;
     memset(&node, 0, sizeof(RBTreeNode_S));
@@ -582,46 +608,46 @@ struct RBTreeNode *selectRBTreeWithKey(struct RBTree *tree, int64_t key)
 }
 
 //前序
-static void NLREnumerateRBTree(struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
+static void NLREnumerateRBTree(struct RBTree *tree, struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
 {
     if (!node || enumerator == NULL) {
         return;
     }
-    enumerator(node, 0);
-    NLREnumerateRBTree(node->left, enumerator);
-    NLREnumerateRBTree(node->right, enumerator);
+    enumerator(tree, node, 0);
+    NLREnumerateRBTree(tree, node->left, enumerator);
+    NLREnumerateRBTree(tree, node->right, enumerator);
 }
 
 //中序遍历(L-N-R),从小到大的顺序
-static void LNREnumerateRBTree(struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
+static void LNREnumerateRBTree(struct RBTree *tree, struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
 {
     if (!node || enumerator == NULL) {
         return;
     }
-    LNREnumerateRBTree(node->left, enumerator);
-    enumerator(node, 0);
-    LNREnumerateRBTree(node->right, enumerator);
+    LNREnumerateRBTree(tree, node->left, enumerator);
+    enumerator(tree, node, 0);
+    LNREnumerateRBTree(tree, node->right, enumerator);
 }
 
 //中序遍历(R-N-L)，从大到小的顺序
-static void RNLEnumerateRBTree(struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
+static void RNLEnumerateRBTree(struct RBTree *tree, struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
 {
     if (!node || enumerator == NULL) {
         return;
     }
-    RNLEnumerateRBTree(node->right, enumerator);
-    enumerator(node, 0);
-    RNLEnumerateRBTree(node->left, enumerator);
+    RNLEnumerateRBTree(tree, node->right, enumerator);
+    enumerator(tree, node, 0);
+    RNLEnumerateRBTree(tree, node->left, enumerator);
 }
 //后序遍历
-static void LRNEnumerateRBTree(struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
+static void LRNEnumerateRBTree(struct RBTree *tree, struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
 {
     if (!node || enumerator == NULL) {
         return;
     }
-    LRNEnumerateRBTree(node->left, enumerator);
-    LRNEnumerateRBTree(node->right, enumerator);
-    enumerator(node, 0);
+    LRNEnumerateRBTree(tree, node->left, enumerator);
+    LRNEnumerateRBTree(tree, node->right, enumerator);
+    enumerator(tree, node, 0);
 }
 
 QueueNode_S *queueNodeWithRBTreeNode(struct RBTreeNode *node)
@@ -633,7 +659,7 @@ QueueNode_S *queueNodeWithRBTreeNode(struct RBTreeNode *node)
     return qnode;
 }
 
-static void ZEnumerateRBTree(struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
+static void ZEnumerateRBTree(struct RBTree *tree, struct RBTreeNode *node, RBTreeNodeEnumerateFunc enumerator)
 {
     if (!node || enumerator == NULL) {
         return;
@@ -678,7 +704,7 @@ static void ZEnumerateRBTree(struct RBTreeNode *node, RBTreeNodeEnumerateFunc en
         }
         
         //遍历回调
-        enumerator(treeNode, level);
+        enumerator(tree, treeNode, level);
         
         //回收qnode进入缓存
         qnode->value = NULL;
@@ -726,23 +752,39 @@ void enumerateRBTree(struct RBTree *tree, BTreeEnumerateType_E enumerateType, RB
         enumerator = tree->enumerator;
     }
     if (enumerateType == BTreeEnumerateTypeNLR) {
-        NLREnumerateRBTree(tree->root, enumerator);
+        NLREnumerateRBTree(tree, tree->root, enumerator);
     }
     else if (enumerateType == BTreeEnumerateTypeLNR) {
-        LNREnumerateRBTree(tree->root, enumerator);
+        LNREnumerateRBTree(tree, tree->root, enumerator);
     }
     else if (enumerateType == BTreeEnumerateTypeRNL) {
-        RNLEnumerateRBTree(tree->root, enumerator);
+        RNLEnumerateRBTree(tree, tree->root, enumerator);
     }
     else if (enumerateType == BTreeEnumerateTypeLRN) {
-        LRNEnumerateRBTree(tree->root, enumerator);
+        LRNEnumerateRBTree(tree, tree->root, enumerator);
     }
     else if (enumerateType == BTreeEnumerateTypeZ) {
-        ZEnumerateRBTree(tree->root, enumerator);
+        ZEnumerateRBTree(tree, tree->root, enumerator);
     }
 }
 
 
+void RBTreeClearEnumerate(struct RBTree *tree, RBTreeNode_S *node, int32_t level)
+{
+    if (node) {
+        node->left = NULL;
+        node->right = NULL;
+        node->parent = NULL;
+    }
+    if (tree->free) {
+        tree->free(tree, node);
+    }
+}
+
+void clearTree(struct RBTree *tree)
+{
+    enumerateRBTree(tree, BTreeEnumerateTypeZ, RBTreeClearEnumerate);
+}
 
 
 

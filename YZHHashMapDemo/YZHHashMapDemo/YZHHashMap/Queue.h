@@ -28,6 +28,6 @@ typedef struct Queue{
 
 void push(struct Queue *queue, struct QueueNode *node);
 QueueNode_S* pop(struct Queue *queue);
-void clear(struct Queue *queue);
+void clearQueue(struct Queue *queue);
 
 #endif /* Queue_h */

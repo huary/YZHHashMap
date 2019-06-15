@@ -45,7 +45,7 @@ QueueNode_S* pop(struct Queue *queue)
     return node;
 }
 
-void clear(struct Queue *queue)
+void clearQueue(struct Queue *queue)
 {
     while (queue->head != NULL) {
         pop(queue);

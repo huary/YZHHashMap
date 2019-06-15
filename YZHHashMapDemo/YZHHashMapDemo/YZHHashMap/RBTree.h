@@ -9,14 +9,9 @@
 #ifndef RBTree_h
 #define RBTree_h
 #include <stdio.h>
+#include "YZHType.h"
 
-#define INTEGER_SWAP(X,Y)       (X==Y ?:(X=X^Y, Y=X^Y, X=X^Y))
-
-typedef enum RBTreeNodeComparisonResult{
-    ASC     = -1,
-    SAME    = 0,
-    DESC    = 1,
-}RBTreeNodeComparisonResult_E;
+typedef YZHComparisonResult_E RBTreeNodeComparisonResult_E;
 
 typedef enum RBTreeDeleteType{
     //后继点
@@ -58,40 +53,49 @@ typedef struct RBTreeNode {
     void *userInfo;
 }RBTreeNode_S,*PRBTreeNode_S;
 
+//C语言前向声明
+struct RBTree;
 
+typedef RBTreeNode_S *(*RBTreeNodeAllocFunc)();
+typedef void (*RBTreeNodeFreeFunc)(struct RBTree *tree, RBTreeNode_S *node);
 
-typedef RBTreeNodeComparisonResult_E (*RBTreeNodeCompareFunc)(RBTreeNode_S *first, RBTreeNode_S *second);
-typedef void (*RBTreeNodeCopyValueFunc)(RBTreeNode_S *src, RBTreeNode_S *dst);
-typedef void (*PBTreeNodeSwapValueFunc)(RBTreeNode_S *first, RBTreeNode_S *second);
-typedef void (*RBTreeNodeReleaseFunc)(RBTreeNode_S *node);
-typedef void (*RBTreeNodeEnumerateFunc)(RBTreeNode_S *node, int32_t level);
+typedef RBTreeNodeComparisonResult_E (*RBTreeNodeCompareFunc)(struct RBTree *tree, RBTreeNode_S *first, RBTreeNode_S *second);
+typedef void (*RBTreeNodeCopyValueFunc)(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S *dst);
+typedef void (*PBTreeNodeSwapValueFunc)(struct RBTree *tree, RBTreeNode_S *first, RBTreeNode_S *second);
+typedef void (*RBTreeNodeEnumerateFunc)(struct RBTree *tree, RBTreeNode_S *node, int32_t level);
 
 typedef struct RBTree {
     RBTreeNode_S *root;
     int32_t count;
+    void *userInfo;
     RBTreeDeleteType_E deleteType;
+    //
+    RBTreeNodeAllocFunc alloc;
+    RBTreeNodeFreeFunc free;
     RBTreeNodeCompareFunc compare;
     RBTreeNodeCopyValueFunc copy;
     PBTreeNodeSwapValueFunc swap;
-    RBTreeNodeReleaseFunc release;
     RBTreeNodeEnumerateFunc enumerator;
 }RBTree_S,*PRBTree_S;
 
-void insertRBTree(struct RBTree *tree, struct RBTreeNode *node);
-void deleteRBTree(struct RBTree *tree, struct RBTreeNode *node);
-struct RBTreeNode *selectRBTree(struct RBTree *tree, struct RBTreeNode *node);
+//返回0表示失败，大于0表示成功
+int8_t insertRBTree(struct RBTree *tree, struct RBTreeNode *node);
+RBTreeNode_S *deleteRBTree(struct RBTree *tree, struct RBTreeNode *node);
+RBTreeNode_S *selectRBTree(struct RBTree *tree, struct RBTreeNode *node);
 
 /*
  *下面以Key的进行操作的话，需要在compare中以key进行比较
  */
-//insertRBTreeWithKey返回的RBTreeNode需要进行free();
-struct RBTreeNode *insertRBTreeWithKey(struct RBTree *tree, int64_t key);
-void deleteRBTreeWithKey(struct RBTree *tree, int64_t key);
-struct RBTreeNode *selectRBTreeWithKey(struct RBTree *tree, int64_t key);
+//insertRBTreeWithKey返回的RBTreeNode是RBTree中alloc函数返回的;
+RBTreeNode_S *insertRBTreeWithKey(struct RBTree *tree, int64_t key);
+RBTreeNode_S *deleteRBTreeWithKey(struct RBTree *tree, int64_t key);
+RBTreeNode_S *selectRBTreeWithKey(struct RBTree *tree, int64_t key);
 
 /*
  *遍历红黑树,enumerator为NULL时取用RBTree里面的enumerator，都为NULL的话，直接返回
  */
 void enumerateRBTree(struct RBTree *tree, BTreeEnumerateType_E enumerateType, RBTreeNodeEnumerateFunc enumerator);
+
+void clearTree(struct RBTree *tree);
 
 #endif /* RBTree_h */

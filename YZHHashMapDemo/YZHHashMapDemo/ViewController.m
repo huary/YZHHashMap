@@ -9,9 +9,19 @@
 #import "ViewController.h"
 #import "RBTree.h"
 #include <mach/mach_time.h>
+#include "YZHType.h"
+#include "YZHHashMap.h"
 
 
-//#define INT_SWAP(X,Y)       (X==Y ?:(X=X^Y,Y=X^Y,X=X^Y))
+//#define INT_SWAP(X,Y)       ((X)==(Y) ?:((X)=(X)^(Y),(Y)=(X)^(Y),(X)=(X)^(Y)))
+//
+//#define _PTR_VAL(PTR)                (*(&(PTR)))
+//#define _PTR_VAL_L(PTR)              _PTR_VAL(PTR)
+//#define _PTR_VAL_R(PTR)             ((intptr_t)_PTR_VAL(PTR))
+//#define PTR_XOR(PTR_X,PTR_Y)        (_PTR_VAL_R(PTR_X) ^ _PTR_VAL_R(PTR_Y))
+//#define PTR_SWAP(X,Y)               ((X)==(Y) ?:(_PTR_VAL_L(X)= PTR_XOR(X,Y),_PTR_VAL_L(Y)= PTR_XOR(X,Y),_PTR_VAL_L(X)=PTR_XOR(X,Y)))
+
+
 @interface ViewController ()
 
 /* <#注释#> */
@@ -24,25 +34,25 @@
 
 @implementation ViewController
 
-static RBTreeNodeComparisonResult_E compare(RBTreeNode_S *first, RBTreeNode_S *second)
+static RBTreeNodeComparisonResult_E compareValue(struct RBTree *tree ,RBTreeNode_S *first, RBTreeNode_S *second)
 {
     if (first->key < second->key) {
-        return ASC;
+        return YZHOrderedASC;//ASC;
     }
     else if (first->key == second->key) {
-        return SAME;
+        return YZHOrderedEQ;//SAME;
     }
     else {
-        return DESC;
+        return YZHOrderedDES;//DESC;
     }
 }
 
-static void copy(RBTreeNode_S *src, RBTreeNode_S *dst)
+static void copyValue(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S *dst)
 {
     dst->key = src->key;
 }
 
-static void swap(RBTreeNode_S *first, RBTreeNode_S *second)
+static void swapValue(struct RBTree *tree, RBTreeNode_S *first, RBTreeNode_S *second)
 {
 //    NSLog(@"1、frist=%@,second=%@",@(first->key),@(second->key));
     INTEGER_SWAP(first->key, second->key);
@@ -50,7 +60,7 @@ static void swap(RBTreeNode_S *first, RBTreeNode_S *second)
 
 }
 
-static void release(RBTreeNode_S *node)
+static void release(struct RBTree *tree, RBTreeNode_S *node)
 {
 //    if (node == NULL) {
 //        free(node);
@@ -58,7 +68,7 @@ static void release(RBTreeNode_S *node)
 //    }
 }
 
-static void enumerator(RBTreeNode_S *node, int32_t level)
+static void enumerator(struct RBTree *tree, RBTreeNode_S *node, int32_t level)
 {
     static int32_t lv = -1;
     if (lv != level) {
@@ -77,7 +87,43 @@ static void enumerator(RBTreeNode_S *node, int32_t level)
     
 //    [self _test];
     
-    [self _test2];
+//    [self _test2];
+    
+//    [self _test3];
+    
+}
+
+-(void)_test3
+{
+    int a = 3;
+    int *pa = &a;
+    int b = 5;
+    int *pb = &b;
+    NSLog(@"1.pa=%p,pb=%p",pa,pb);
+//    uint64_t pav = (uint64_t)pa;
+    intptr_t pav = *(&pa);
+    intptr_t pbv = *(&pb);
+    NSLog(@"pav=%0x,pbv=%0x",pav,pbv);
+//    INT_SWAP(pav, pbv);
+    
+//    NSLog(@"=========%0x",@(((intptr_t)*(&pa))^((intptr_t)*(&pb))));
+//    NSLog(@"----------pa^pb=%@",@(pa^pb));
+    
+//    intptr_t _X = (pa==pb ?:(pa=pa^pb,pa=((intptr_t)*(&pa))^((intptr_t)*(&pb)),(*(&pa))=((intptr_t)*(&pa))^((intptr_t)*(&pb))));
+
+    
+//    intptr_t _X = ((*(&pa))==(*(&pb)) ?:((*(&pa))=((intptr_t)*(&pa))^((intptr_t)*(&pb)),(*(&pb))=((intptr_t)*(&pa))^((intptr_t)*(&pb)),(*(&pa))=((intptr_t)*(&pa))^((intptr_t)*(&pb))));
+//    PTR_SWAP(*(&pa), *(&pb));
+//    INT_SWAP((intptr_t)*(&pa), (intptr_t)*(&pb));
+    PTR_SWAP(pa, pb);
+    
+    NSLog(@"pav=%0x,pbv=%0x",pav,pbv);
+//    *(&pa) = pbv;
+//    *(&pb) = pav;
+    NSLog(@"2.pa=%p,pb=%p",pa,pb);
+    NSLog(@"pa=%d,pb=%d",*pa,*pb);
+    
+
 }
 
 //@property (nonatomic, strong) NSMutableArray<NSNumber*> *list;
@@ -104,10 +150,10 @@ static void enumerator(RBTreeNode_S *node, int32_t level)
 -(void)_test
 {
     RBTree_S *tree = calloc(1, sizeof(RBTree_S));
-    tree->compare = compare;
-    tree->copy = copy;
-    tree->swap = swap;
-    tree->release = release;
+    tree->compare = compareValue;
+    tree->copy = copyValue;
+    tree->swap = swapValue;
+//    tree->release = release;
     tree->enumerator = enumerator;
     
     int a[] = {12, 1, 9, 2, 0, 11, 7, 19, 4, 15, 18, 5, 14, 13, 10, 16, 6, 3, 8, 17};//{4,6,2,9,7,0,22,10,20,16,23,11,26,14,30,19,28,31,15,3};//{12, 1, 9, 2, 0, 11, 7, 19, 4, 15, 18, 5, 14, 13, 10, 16, 6, 3, 8, 17};
@@ -170,10 +216,10 @@ int64_t getUptimeInMilliseconds()
     memset(ptrNodeT, 0, cnt * sizeof(RBTreeNode_S));
     
     RBTree_S *tree = calloc(1, sizeof(RBTree_S));
-    tree->compare = compare;
-    tree->copy = copy;
-    tree->swap = swap;
-    tree->release = release;
+    tree->compare = compareValue;
+    tree->copy = copyValue;
+    tree->swap = swapValue;
+//    tree->free = release;
     tree->enumerator = enumerator;
     
     int32_t i = 0;
@@ -225,9 +271,90 @@ int64_t getUptimeInMilliseconds()
     self.list = nil;
 }
 
+int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
+{
+    return 0;
+}
+
+-(void)_test4
+{
+    int32_t cnt = 1000000;//100;
+    int32_t mask = 1048575;//127;//1048575;
+    
+    int32_t capcity = 524288;//262144;//10;//10000;
+    YZHHashMap_S *hashMap = allocHashMapWithCapacity(capcity);
+    hashMap->shouldAdjustFunc = hashMapShouldAdjustFunc;
+    
+    
+//    RBTreeNode_S *ptrNodeT = malloc(cnt * sizeof(RBTreeNode_S));//calloc(cnt, sizeof(RBTreeNode_S));
+//    if (ptrNodeT == NULL) {
+//        return;
+//    }
+//    memset(ptrNodeT, 0, cnt * sizeof(RBTreeNode_S));
+//
+//    RBTree_S *tree = calloc(1, sizeof(RBTree_S));
+//    tree->compare = compareValue;
+//    tree->copy = copyValue;
+//    tree->swap = swapValue;
+//    tree->enumerator = enumerator;
+    
+    int32_t i = 0;
+    while (i < cnt) {
+        uint32_t val = arc4random()&mask;
+        NSNumber *num = @(val);
+        if (![self.info objectForKey:num]) {
+            [self.list addObject:num];
+            [self.info setObject:num forKey:num];
+            
+            T key = {.V.val = val};
+            T value = {.V.val = val};
+            insertHashMap(hashMap, &key, &value);
+            ++i;
+        }
+    }
+    
+    NSLog(@"hashMap.cout=%ld",hashMap->count);
+    
+//    print(hashMap);
+//    return;
+    
+    //    [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    //        NSLog(@"idx=%ld,val=%@",idx,obj);
+    //    }];
+    
+    
+    NSLog(@"start===========================");
+    int64_t start = getUptimeInMilliseconds();
+    [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self.info objectForKey:obj];
+    }];
+    int64_t end = getUptimeInMilliseconds();
+    NSLog(@"info.differ=%@",@(end - start));
+
+    
+    start = getUptimeInMilliseconds();
+    [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        int32_t val = [obj unsignedIntValue];
+        T key = {.V.val = val};
+        T *value = selectHashMap(hashMap, &key);
+        
+    }];
+    end = getUptimeInMilliseconds();
+    NSLog(@"tree.differ=%@,count=%d",@(end - start),hashMap->count);
+    
+    //    enumerateRBTree(tree, BTreeEnumerateTypeZ, NULL);
+    //    enumerateRBTree(tree, BTreeEnumerateTypeLNR, NULL);
+    //    enumerateRBTree(tree, BTreeEnumerateTypeRNL, NULL);
+    
+
+    freeHashMap(hashMap);
+    self.info = nil;
+    self.list = nil;
+}
+
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
-    [self _test2];
+    [self _test4];
 }
 
 

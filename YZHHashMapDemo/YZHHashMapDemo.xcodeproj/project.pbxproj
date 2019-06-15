@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1C1F318622A5008000ED2ED1 /* Queue.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C1F318422A5008000ED2ED1 /* Queue.c */; };
+		1C3D3BDC22B0042B0064D015 /* YZHType.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C3D3BDB22B0042B0064D015 /* YZHType.c */; };
+		1CD1C2A222AABE4B00FCE270 /* YZHHashMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1CD1C2A022AABE4B00FCE270 /* YZHHashMap.c */; };
 		1CDF10A322A25C3200826285 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CDF10A222A25C3200826285 /* AppDelegate.m */; };
 		1CDF10A622A25C3200826285 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CDF10A522A25C3200826285 /* ViewController.m */; };
 		1CDF10A922A25C3200826285 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1CDF10A722A25C3200826285 /* Main.storyboard */; };
@@ -20,6 +22,12 @@
 /* Begin PBXFileReference section */
 		1C1F318422A5008000ED2ED1 /* Queue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Queue.c; sourceTree = "<group>"; };
 		1C1F318522A5008000ED2ED1 /* Queue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
+		1C3D3BDB22B0042B0064D015 /* YZHType.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = YZHType.c; sourceTree = "<group>"; };
+		1CD1C2A022AABE4B00FCE270 /* YZHHashMap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = YZHHashMap.c; sourceTree = "<group>"; };
+		1CD1C2A122AABE4B00FCE270 /* YZHHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHHashMap.h; sourceTree = "<group>"; };
+		1CD1C2A322ABDBC200FCE270 /* YZHType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHType.h; sourceTree = "<group>"; };
+		1CD1C2A422AC06F000FCE270 /* type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = type.h; sourceTree = "<group>"; };
+		1CD1C2A522AC06F000FCE270 /* macro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = macro.h; sourceTree = "<group>"; };
 		1CDF109E22A25C3200826285 /* YZHHashMapDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YZHHashMapDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1CDF10A122A25C3200826285 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1CDF10A222A25C3200826285 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -81,10 +89,16 @@
 		1CDF10B922A25C9A00826285 /* YZHHashMap */ = {
 			isa = PBXGroup;
 			children = (
+				1CD1C2A522AC06F000FCE270 /* macro.h */,
+				1CD1C2A422AC06F000FCE270 /* type.h */,
 				1CDF10C022A2600C00826285 /* RBTree.c */,
 				1CDF10C122A2600C00826285 /* RBTree.h */,
 				1C1F318422A5008000ED2ED1 /* Queue.c */,
 				1C1F318522A5008000ED2ED1 /* Queue.h */,
+				1CD1C2A022AABE4B00FCE270 /* YZHHashMap.c */,
+				1CD1C2A122AABE4B00FCE270 /* YZHHashMap.h */,
+				1CD1C2A322ABDBC200FCE270 /* YZHType.h */,
+				1C3D3BDB22B0042B0064D015 /* YZHType.c */,
 			);
 			path = YZHHashMap;
 			sourceTree = "<group>";
@@ -164,7 +178,9 @@
 				1CDF10C222A2600C00826285 /* RBTree.c in Sources */,
 				1CDF10A622A25C3200826285 /* ViewController.m in Sources */,
 				1CDF10B122A25C3200826285 /* main.m in Sources */,
+				1C3D3BDC22B0042B0064D015 /* YZHType.c in Sources */,
 				1CDF10A322A25C3200826285 /* AppDelegate.m in Sources */,
+				1CD1C2A222AABE4B00FCE270 /* YZHHashMap.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
