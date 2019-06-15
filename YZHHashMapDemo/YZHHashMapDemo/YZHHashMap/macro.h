@@ -523,4 +523,7 @@
 
 #endif
 
+#define LIKELY(CON)                                       __builtin_expect(!!(CON), 1)
+#define UNLIKELY(CON)                                     __builtin_expect(!!(CON), 0)
+
 #endif

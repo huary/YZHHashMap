@@ -153,7 +153,7 @@ static void RBTreeEnumerator(struct RBTree *tree, RBTreeNode_S *treeNode, int32_
 }
 
 
-static struct RBTreeNode *selectTreeNodeFromMapEntry(struct YZHMapEntry *mapEntry, T *key)
+static inline struct RBTreeNode *selectTreeNodeFromMapEntry(struct YZHMapEntry *mapEntry, T *key)
 {
 //    if (mapEntry->type != YZHMapEntryTypeRBTree || mapEntry->entry.tree == NULL || key == NULL) {
 //        return NULL;
@@ -209,7 +209,7 @@ static struct YZHMapNode *defaultMapEntryDelete(struct YZHMapEntry *mapEntry, T 
     return findMapNode;
 }
 
-static struct YZHMapNode *defaultMapEntrySelect(struct YZHMapEntry *mapEntry, T *key)
+static inline struct YZHMapNode *defaultMapEntrySelect(struct YZHMapEntry *mapEntry, T *key)
 {
     struct RBTreeNode *treeNode = selectTreeNodeFromMapEntry(mapEntry, key);
     if (treeNode) {
@@ -547,15 +547,15 @@ T * deleteHashMap(struct YZHHashMap *hashMap, T *key)
 
 T * selectHashMap(struct YZHHashMap *hashMap, T *key)
 {
-//    if (hashMap == NULL) {
-//        return NULL;
-//    }
+    if (hashMap == NULL) {
+        return NULL;
+    }
     struct YZHHashNode *hashNode = hashNodeFor(hashMap, key);
 //    if (hashNode && hashNode->mapEntry && hashNode->mapEntry->selectFunc) {
 //        YZHMapNode_S *mapNode = hashNode->mapEntry->selectFunc(hashNode->mapEntry, key);
 //        return &mapNode->val;
 //    }
-    if (hashNode->mapEntry) {
+    if (LIKELY(hashNode->mapEntry)) {
         YZHMapNode_S *mapNode = hashNode->mapEntry->selectFunc(hashNode->mapEntry, key);
         return &mapNode->val;
     }
@@ -606,7 +606,8 @@ void print(struct YZHHashMap *hashMap)
         struct YZHMapEntry *mapEntry = hashNode->mapEntry;
         if (mapEntry) {
             tt += mapEntry->entry.tree->count;
-            printf("%d=%d,total=%d\n",i,mapEntry->entry.tree->count,tt);
+            mapEntry->enumerator(mapEntry, NULL, &hashMap->state);
         }
     }
 }
+

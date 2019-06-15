@@ -18,7 +18,7 @@ YZHComparisonResult_E compare(T *first, T *second)
         return YZHOrderedEQ;
     }
     if (first->size == 0 && second->size == 0) {
-        if (first->V.val > second->V.val) {
+        if (first->V.val < second->V.val) {
             return YZHOrderedASC;
         }
         else if (first->V.val == second->V.val) {
