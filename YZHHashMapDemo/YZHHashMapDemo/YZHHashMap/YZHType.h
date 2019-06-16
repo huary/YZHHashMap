@@ -40,13 +40,11 @@ typedef struct {
     } V;
 }T;
 
-//typedef YZHComparisonResult_E (*TCompareFunc)(T *first, T *second);
-//typedef void (*TCopyFunc)(T *src, T *dst);
-//typedef void (*TSwapFunc)(T *first, T *second);
+void memswap(uint8_t *first, uint8_t *second, size_t size);
 
 YZHComparisonResult_E compare(T *first, T *second);
 //void copy(T *src, T *dst);
-//void swap(T *first, T *second);
+void swap(T *first, T *second);
 
 
 #endif /* YZHType_h */

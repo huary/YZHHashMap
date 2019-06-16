@@ -37,15 +37,16 @@
 
 static RBTreeNodeComparisonResult_E compareValue(struct RBTree *tree ,RBTreeNode_S *first, RBTreeNode_S *second)
 {
-    if (first->key < second->key) {
-        return YZHOrderedASC;//ASC;
-    }
-    else if (first->key == second->key) {
-        return YZHOrderedEQ;//SAME;
-    }
-    else {
-        return YZHOrderedDES;//DESC;
-    }
+    return compare(&first->key, &second->key);
+//    if (first->key < second->key) {
+//        return YZHOrderedASC;//ASC;
+//    }
+//    else if (first->key == second->key) {
+//        return YZHOrderedEQ;//SAME;
+//    }
+//    else {
+//        return YZHOrderedDES;//DESC;
+//    }
 }
 
 static void copyValue(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S *dst)
@@ -55,8 +56,9 @@ static void copyValue(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S *dst)
 
 static void swapValue(struct RBTree *tree, RBTreeNode_S *first, RBTreeNode_S *second)
 {
+    swap(first, second);
 //    NSLog(@"1、frist=%@,second=%@",@(first->key),@(second->key));
-    INTEGER_SWAP(first->key, second->key);
+//    INTEGER_SWAP(first->key, second->key);
 //    NSLog(@"2、frist=%@,second=%@",@(first->key),@(second->key));
 
 }
@@ -136,7 +138,8 @@ static void enumerator(struct RBTree *tree, RBTreeNode_S *node, int32_t level)
     for (int i = 0; i < cnt; ++i) {
         int b = a[i];
         RBTreeNode_S *node = calloc(1, sizeof(RBTreeNode_S));
-        node->key = b;
+        T t = {.V.val = b};
+        node->key = t;
         insertRBTree(tree, node);
         
         NSLog(@"\ni=%d,insertV=%d,插入后:\n",i,b);
@@ -206,8 +209,8 @@ int64_t getUptimeInMilliseconds()
         if (![self.info objectForKey:num]) {
             [self.list addObject:num];
             [self.info setObject:num forKey:num];
-            
-            ptrNodeT[i].key = val;
+            T t = {.V.val = val};
+            ptrNodeT[i].key = t;
             insertRBTree(tree, &ptrNodeT[i]);
             ++i;
         }
@@ -259,7 +262,7 @@ int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
     int32_t cnt = self.list.count;//1000000;//100;
 //    int32_t mask = 1048575;//127;//1048575;
     
-    int32_t capcity = cnt * 0.5;//cnt;//1048576;//524288;//cnt;//1048576;//524288;//262144;//10;//10000;
+    int32_t capcity = cnt * 0.2;//cnt * 0.2;//cnt;//1048576;//524288;//cnt;//1048576;//524288;//262144;//10;//10000;
     YZHHashMap_S *hashMap = allocHashMapWithCapacity(capcity);
     hashMap->shouldAdjustFunc = hashMapShouldAdjustFunc;
 
@@ -293,12 +296,11 @@ int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
             NSLog(@"===================2");
             *stop = YES;
         }
-        selectHashMap(hashMap, &key);
+//        selectHashMap(hashMap, &key);
     }];
     end = getUptimeInMilliseconds();
-    NSLog(@"tree.differ=%@,count=%d",@(end - start),hashMap->count);
+    NSLog(@"hashMap.differ=%@,count=%d",@(end - start),hashMap->count);
     
-
     freeHashMap(hashMap);
     self.info = nil;
     self.list = nil;

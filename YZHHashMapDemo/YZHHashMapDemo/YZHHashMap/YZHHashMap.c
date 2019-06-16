@@ -86,9 +86,7 @@ static void defaultRBTreeNodeFree(struct RBTree *tree, RBTreeNode_S *node)
 
 static RBTreeNodeComparisonResult_E RBTreeNodeCompare(struct RBTree *tree, RBTreeNode_S *first, RBTreeNode_S *second)
 {
-    YZHMapNode_S *firstMapNode = first->value;
-    YZHMapNode_S *secondMapNode = second->value;
-    return compare(&firstMapNode->key, &secondMapNode->key);
+    return compare(&first->key, &second->key);
 }
 
 static void RBTreeNodeCopy(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S *dst)
@@ -100,7 +98,8 @@ static void RBTreeNodeCopy(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S 
 
 static void RBTreeNodeSwap(struct RBTree *tree, RBTreeNode_S *first, RBTreeNode_S *second)
 {
-    INTEGER_SWAP(first->key, second->key);
+//    INTEGER_SWAP(first->key, second->key);
+    swap(&first->key, &second->key);
     PTR_SWAP(first->value, second->value);
     PTR_SWAP(first->userInfo, second->userInfo);
 }
@@ -127,9 +126,10 @@ static void RBTreeEnumerator(struct RBTree *tree, RBTreeNode_S *treeNode, int32_
     }
     else if (state == YZHHashMapStateAdjust) {
         if (mapEntry->enumerateCallback) {
-//            treeNode->parent = NULL;
-//            treeNode->left = NULL;
-//            treeNode->right = NULL;
+            //在这里把这个节点从原来的tree中迁移出来
+            treeNode->parent = NULL;
+            treeNode->left = NULL;
+            treeNode->right = NULL;
             YZHMapNode_S *mapNode = treeNode->value;
             int8_t r = mapEntry->enumerateCallback(mapEntry, mapNode, treeNode);
             if (r > 0) {
@@ -155,12 +155,12 @@ static void RBTreeEnumerator(struct RBTree *tree, RBTreeNode_S *treeNode, int32_
 
 static inline struct RBTreeNode *selectTreeNodeFromMapEntry(struct YZHMapEntry *mapEntry, T *key)
 {
-//    if (mapEntry->type != YZHMapEntryTypeRBTree || mapEntry->entry.tree == NULL || key == NULL) {
-//        return NULL;
-//    }
+    if (mapEntry->type != YZHMapEntryTypeRBTree || mapEntry->entry.tree == NULL || key == NULL) {
+        return NULL;
+    }
     RBTree_S *tree = mapEntry->entry.tree;
     struct YZHMapNode mapNode = {.key = *key};
-    struct RBTreeNode conditionNode = {.value = &mapNode};
+    struct RBTreeNode conditionNode = {.key = *key, .value = &mapNode};
     struct RBTreeNode *treeNode = selectRBTree(tree, &conditionNode);
     return treeNode;
 }
@@ -195,6 +195,7 @@ static int8_t defaultMapEntryInsert(struct YZHMapEntry *mapEntry, struct YZHMapN
         }
     }
     treeNode->value = node;
+    treeNode->key = node->key;
     return insertRBTree(tree, treeNode);
 }
 
@@ -519,11 +520,8 @@ YZHMapNode_S *insertHashMap(struct YZHHashMap *hashMap, T *key, T *val)
     mapEntry->hashNode = hashNode;
     
     struct YZHMapNode *mapNode = newMapNode(mapEntry, key, val, hashValue);
-//    int8_t r = mapEntry->insertFunc(mapEntry, mapNode, NULL);
     mapEntry->insertFunc(mapEntry, mapNode, NULL);
     ++hashMap->count;
-//    if (r) {
-//    }
     return mapNode;
 }
 
@@ -551,10 +549,6 @@ T * selectHashMap(struct YZHHashMap *hashMap, T *key)
         return NULL;
     }
     struct YZHHashNode *hashNode = hashNodeFor(hashMap, key);
-//    if (hashNode && hashNode->mapEntry && hashNode->mapEntry->selectFunc) {
-//        YZHMapNode_S *mapNode = hashNode->mapEntry->selectFunc(hashNode->mapEntry, key);
-//        return &mapNode->val;
-//    }
     if (LIKELY(hashNode->mapEntry)) {
         YZHMapNode_S *mapNode = hashNode->mapEntry->selectFunc(hashNode->mapEntry, key);
         return &mapNode->val;

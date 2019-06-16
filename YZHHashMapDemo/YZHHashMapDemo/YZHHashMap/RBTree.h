@@ -48,7 +48,8 @@ typedef struct RBTreeNode {
     struct RBTreeNode *left;
     struct RBTreeNode *right;
     RBTreeNodeColor_E color;
-    uint64_t key;
+//    uint64_t key;
+    T key;
     void *value;
     void *userInfo;
 }RBTreeNode_S,*PRBTreeNode_S;

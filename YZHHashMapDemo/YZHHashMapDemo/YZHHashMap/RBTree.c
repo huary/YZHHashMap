@@ -73,15 +73,7 @@ static void defaultRBTreeNodeFree(struct RBTree *tree, RBTreeNode_S *node)
 
 static RBTreeNodeComparisonResult_E defaultRBTreeCompare(struct RBTree *tree, struct RBTreeNode *first,struct RBTreeNode *second)
 {
-    if (first->key < second->key) {
-        return YZHOrderedASC;// ASC;
-    }
-    else if (first->key == second->key) {
-        return YZHOrderedEQ;//SAME;
-    }
-    else {
-        return YZHOrderedDES;//DESC;
-    }
+    return compare(&first->key, &second->key);
 }
 
 static void defaultCopyValue(struct RBTree *tree, RBTreeNode_S *src, RBTreeNode_S *dst)
@@ -99,7 +91,8 @@ static void defaultSwapValue(struct RBTree *tree, RBTreeNode_S *first, RBTreeNod
     if (first == NULL || second == NULL) {
         return;
     }
-    INTEGER_SWAP(first->key, second->key);
+//    INTEGER_SWAP(first->key, second->key);
+    swap(&first->key, &second->key);
     PTR_SWAP(first->value, second->value);
     PTR_SWAP(first->userInfo, second->userInfo);
 }
@@ -585,7 +578,8 @@ RBTreeNode_S *insertRBTreeWithKey(struct RBTree *tree, int64_t key)
 {
     RBTreeNode_S *insert = tree->alloc();
     if (insert) {
-        insert->key = key;
+        T t = {.V.val = key};
+        insert->key = t;
         insertRBTree(tree, insert);
     }
     return insert;
@@ -595,7 +589,8 @@ RBTreeNode_S *deleteRBTreeWithKey(struct RBTree *tree, int64_t key)
 {
     RBTreeNode_S node;
     memset(&node, 0, sizeof(RBTreeNode_S));
-    node.key = key;
+    T t = {.V.val = key};
+    node.key = t;
     return deleteRBTree(tree, &node);
 }
 
@@ -603,7 +598,8 @@ RBTreeNode_S *selectRBTreeWithKey(struct RBTree *tree, int64_t key)
 {
     RBTreeNode_S node;
     memset(&node, 0, sizeof(RBTreeNode_S));
-    node.key = key;
+    T t = {.V.val = key};
+    node.key = t;
     return selectRBTree(tree, &node);
 }
 

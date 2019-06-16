@@ -11,6 +11,21 @@
 #include <stdlib.h>
 #include <memory.h>
 
+void memswap(uint8_t *first, uint8_t *second, size_t size)
+{
+    size_t i = 0;
+    while (i < size) {
+        if (size > i + 4) {
+            INTEGER_SWAP(*((int32_t*)first+i), *((int32_t*)second+i));
+            i = i + 4;
+        }
+        else {
+            INTEGER_SWAP(*(first+i), *(second+i));
+            ++i;
+        }
+    }
+}
+
 
 YZHComparisonResult_E compare(T *first, T *second)
 {
@@ -49,15 +64,21 @@ YZHComparisonResult_E compare(T *first, T *second)
             return YZHOrderedDES;
         }
     }
-    return YZHOrderedEQ;
+    return YZHOrderedEQ;    
 }
+
 
 //void copy(T *src, T *dst)
 //{
 //    
 //}
-//void swap(T *first, T *second)
-//{
-//    
-//}
+void swap(T *first, T *second)
+{
+    if (first == NULL || second == NULL) {
+        return;
+    }
+    INTEGER_SWAP(first->size, second->size);
+    INTEGER_SWAP(first->V.val, second->V.val);
+    PTR_SWAP(first->V.ptr, second->V.ptr);
+}
 
