@@ -30,14 +30,20 @@ typedef enum YZHComparisonResult  {
     YZHOrderedDES       = 1,
 }YZHComparisonResult_E;
 
+struct T;
+typedef void (*initTFunc)(struct T *t);
+typedef void (*deallocTFunc)(struct T *t);
 
-typedef struct {
+typedef struct T{
     //size为0时，取.val，size>0否则取ptr所指向的为size长度的内容,size<0时取ptr指向的对象(C++,OBJC之类的对象，自己实现比较函数)
     int32_t size;
     union {
         uint8_t *ptr;
         uint64_t val;
     } V;
+    
+    initTFunc init;
+    deallocTFunc dealloc;
 }T;
 
 void memswap(uint8_t *first, uint8_t *second, size_t size);

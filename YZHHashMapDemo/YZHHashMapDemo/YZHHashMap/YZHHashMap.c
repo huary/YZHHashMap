@@ -10,6 +10,7 @@
 #include <memory.h>
 #include "YZHHashMap.h"
 #include "macro.h"
+#include "YZHHash.h"
 
 static int32_t hashTableCapcity_s[] = {8, 32, 128, 8192, 131072, 524288};
 
@@ -19,31 +20,31 @@ static float hashAdjustCapcityFactory_s = 0.75;
 //2^n + 1
 //17,31,257
 //static int32_t hashSeed[] = {4, 8};
-static int32_t hashSeed_s = 4;
+//static int32_t hashSeed_s = 4;
 
-static uint64_t defaultHashFunc(T *key)
-{
-    if (key == NULL) {
-        return 0;
-    }
-    uint64_t hash = 0;
-    if (key->size == 0) {
-        uint64_t val = key->V.val;
-        return val;
-//        while (val > 0) {
-//            hash = TYPE_LS(hash, hashSeed_s) + hash + TYPE_AND(val, NUM_8_POWOFTWO_MASK);
-//            val = TYPE_RS(val, 8);
+//static uint64_t defaultHashFunc(T *key)
+//{
+//    if (key == NULL) {
+//        return 0;
+//    }
+//    uint64_t hash = 0;
+//    if (key->size == 0) {
+//        uint64_t val = key->V.val;
+//        return val;
+////        while (val > 0) {
+////            hash = TYPE_LS(hash, hashSeed_s) + hash + TYPE_AND(val, NUM_8_POWOFTWO_MASK);
+////            val = TYPE_RS(val, 8);
+////        }
+//    }
+//    else {
+//        uint8_t *ptr = key->V.ptr;
+//        while (*ptr) {
+//            hash = TYPE_LS(hash, hashSeed_s) + hash + *ptr;
+//            ++ptr;
 //        }
-    }
-    else {
-        uint8_t *ptr = key->V.ptr;
-        while (*ptr) {
-            hash = TYPE_LS(hash, hashSeed_s) + hash + *ptr;
-            ++ptr;
-        }
-    }
-    return hash;
-}
+//    }
+//    return hash;
+//}
 
 static int8_t defaultShouldAdjustFunc(struct YZHHashMap *hashMap)
 {
@@ -375,7 +376,7 @@ static int32_t getNextCapcityWithOld(int32_t oldCapcity)
 static void checkHashMap(struct YZHHashMap *hashMap) {
     
     if (!hashMap->hashFunc) {
-        hashMap->hashFunc = defaultHashFunc;
+        hashMap->hashFunc = BKDRHash;
     }
     if (!hashMap->shouldAdjustFunc) {
         hashMap->shouldAdjustFunc = defaultShouldAdjustFunc;

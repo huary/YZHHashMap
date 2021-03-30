@@ -8,7 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		1C1F318622A5008000ED2ED1 /* Queue.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C1F318422A5008000ED2ED1 /* Queue.c */; };
+		1C356AF12311099D00EAEBCD /* HashTree.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C356AF02311099D00EAEBCD /* HashTree.c */; };
+		1C356AF4231289E900EAEBCD /* YZHHash.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C356AF3231289E900EAEBCD /* YZHHash.c */; };
+		1C356AF72312F52F00EAEBCD /* YZHMachTimeUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C356AF52312F52F00EAEBCD /* YZHMachTimeUtils.m */; };
 		1C3D3BDC22B0042B0064D015 /* YZHType.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C3D3BDB22B0042B0064D015 /* YZHType.c */; };
+		1C57FDF2231ACBA300859C5A /* TTree.c in Sources */ = {isa = PBXBuildFile; fileRef = 1C57FDF1231ACBA300859C5A /* TTree.c */; };
 		1CD1C2A222AABE4B00FCE270 /* YZHHashMap.c in Sources */ = {isa = PBXBuildFile; fileRef = 1CD1C2A022AABE4B00FCE270 /* YZHHashMap.c */; };
 		1CDF10A322A25C3200826285 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CDF10A222A25C3200826285 /* AppDelegate.m */; };
 		1CDF10A622A25C3200826285 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1CDF10A522A25C3200826285 /* ViewController.m */; };
@@ -22,7 +26,15 @@
 /* Begin PBXFileReference section */
 		1C1F318422A5008000ED2ED1 /* Queue.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Queue.c; sourceTree = "<group>"; };
 		1C1F318522A5008000ED2ED1 /* Queue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Queue.h; sourceTree = "<group>"; };
+		1C356AEF2311099D00EAEBCD /* HashTree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HashTree.h; sourceTree = "<group>"; };
+		1C356AF02311099D00EAEBCD /* HashTree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = HashTree.c; sourceTree = "<group>"; };
+		1C356AF2231289E900EAEBCD /* YZHHash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHHash.h; sourceTree = "<group>"; };
+		1C356AF3231289E900EAEBCD /* YZHHash.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = YZHHash.c; sourceTree = "<group>"; };
+		1C356AF52312F52F00EAEBCD /* YZHMachTimeUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YZHMachTimeUtils.m; sourceTree = "<group>"; };
+		1C356AF62312F52F00EAEBCD /* YZHMachTimeUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YZHMachTimeUtils.h; sourceTree = "<group>"; };
 		1C3D3BDB22B0042B0064D015 /* YZHType.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = YZHType.c; sourceTree = "<group>"; };
+		1C57FDF0231ACBA300859C5A /* TTree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TTree.h; sourceTree = "<group>"; };
+		1C57FDF1231ACBA300859C5A /* TTree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = TTree.c; sourceTree = "<group>"; };
 		1CD1C2A022AABE4B00FCE270 /* YZHHashMap.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = YZHHashMap.c; sourceTree = "<group>"; };
 		1CD1C2A122AABE4B00FCE270 /* YZHHashMap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHHashMap.h; sourceTree = "<group>"; };
 		1CD1C2A322ABDBC200FCE270 /* YZHType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YZHType.h; sourceTree = "<group>"; };
@@ -72,6 +84,8 @@
 		1CDF10A022A25C3200826285 /* YZHHashMapDemo */ = {
 			isa = PBXGroup;
 			children = (
+				1C356AF62312F52F00EAEBCD /* YZHMachTimeUtils.h */,
+				1C356AF52312F52F00EAEBCD /* YZHMachTimeUtils.m */,
 				1CDF10B922A25C9A00826285 /* YZHHashMap */,
 				1CDF10A122A25C3200826285 /* AppDelegate.h */,
 				1CDF10A222A25C3200826285 /* AppDelegate.m */,
@@ -89,16 +103,22 @@
 		1CDF10B922A25C9A00826285 /* YZHHashMap */ = {
 			isa = PBXGroup;
 			children = (
+				1C356AF02311099D00EAEBCD /* HashTree.c */,
+				1C356AEF2311099D00EAEBCD /* HashTree.h */,
 				1CD1C2A522AC06F000FCE270 /* macro.h */,
-				1CD1C2A422AC06F000FCE270 /* type.h */,
-				1CDF10C022A2600C00826285 /* RBTree.c */,
-				1CDF10C122A2600C00826285 /* RBTree.h */,
 				1C1F318422A5008000ED2ED1 /* Queue.c */,
 				1C1F318522A5008000ED2ED1 /* Queue.h */,
+				1CDF10C022A2600C00826285 /* RBTree.c */,
+				1CDF10C122A2600C00826285 /* RBTree.h */,
+				1CD1C2A422AC06F000FCE270 /* type.h */,
 				1CD1C2A022AABE4B00FCE270 /* YZHHashMap.c */,
 				1CD1C2A122AABE4B00FCE270 /* YZHHashMap.h */,
-				1CD1C2A322ABDBC200FCE270 /* YZHType.h */,
 				1C3D3BDB22B0042B0064D015 /* YZHType.c */,
+				1CD1C2A322ABDBC200FCE270 /* YZHType.h */,
+				1C356AF2231289E900EAEBCD /* YZHHash.h */,
+				1C356AF3231289E900EAEBCD /* YZHHash.c */,
+				1C57FDF0231ACBA300859C5A /* TTree.h */,
+				1C57FDF1231ACBA300859C5A /* TTree.c */,
 			);
 			path = YZHHashMap;
 			sourceTree = "<group>";
@@ -174,13 +194,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1C57FDF2231ACBA300859C5A /* TTree.c in Sources */,
 				1C1F318622A5008000ED2ED1 /* Queue.c in Sources */,
 				1CDF10C222A2600C00826285 /* RBTree.c in Sources */,
 				1CDF10A622A25C3200826285 /* ViewController.m in Sources */,
 				1CDF10B122A25C3200826285 /* main.m in Sources */,
 				1C3D3BDC22B0042B0064D015 /* YZHType.c in Sources */,
+				1C356AF72312F52F00EAEBCD /* YZHMachTimeUtils.m in Sources */,
+				1C356AF4231289E900EAEBCD /* YZHHash.c in Sources */,
 				1CDF10A322A25C3200826285 /* AppDelegate.m in Sources */,
 				1CD1C2A222AABE4B00FCE270 /* YZHHashMap.c in Sources */,
+				1C356AF12311099D00EAEBCD /* HashTree.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -315,7 +339,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QSXU259F8V;
+				DEVELOPMENT_TEAM = 7C6YPJQ829;
 				INFOPLIST_FILE = YZHHashMapDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -330,7 +354,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QSXU259F8V;
+				DEVELOPMENT_TEAM = 7C6YPJQ829;
 				INFOPLIST_FILE = YZHHashMapDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

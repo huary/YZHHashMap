@@ -8,10 +8,11 @@
 
 #import "ViewController.h"
 #import "RBTree.h"
-#include <mach/mach_time.h>
 #include "YZHType.h"
 #include "YZHHashMap.h"
 #include "macro.h"
+#include "HashTree.h"
+#import "YZHMachTimeUtils.h"
 
 
 //#define INT_SWAP(X,Y)       ((X)==(Y) ?:((X)=(X)^(Y),(Y)=(X)^(Y),(X)=(X)^(Y)))
@@ -21,6 +22,10 @@
 //#define _PTR_VAL_R(PTR)             ((intptr_t)_PTR_VAL(PTR))
 //#define PTR_XOR(PTR_X,PTR_Y)        (_PTR_VAL_R(PTR_X) ^ _PTR_VAL_R(PTR_Y))
 //#define PTR_SWAP(X,Y)               ((X)==(Y) ?:(_PTR_VAL_L(X)= PTR_XOR(X,Y),_PTR_VAL_L(Y)= PTR_XOR(X,Y),_PTR_VAL_L(X)=PTR_XOR(X,Y)))
+
+
+static uint8_t HashTreeNodeCountList_s[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53};
+
 
 
 @interface ViewController ()
@@ -88,12 +93,24 @@ static void enumerator(struct RBTree *tree, RBTreeNode_S *node, int32_t level)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    [self _testMut];
+    
 //    [self _test];
     
 //    [self _test2];
     
 //    [self _test3];
     
+}
+
+- (void)_testMut
+{
+    uint64_t r = 1;
+    for (int i = 0; i < sizeof(HashTreeNodeCountList_s)/sizeof(uint8_t); ++i) {
+        r = r * HashTreeNodeCountList_s[i];
+        NSLog(@"r=%llu,p=%d",r,HashTreeNodeCountList_s[i]);
+    }
+    NSLog(@"r=%llu",r);
 }
 
 -(void)_test3
@@ -169,23 +186,23 @@ static void enumerator(struct RBTree *tree, RBTreeNode_S *node, int32_t level)
 }
 
 
-int64_t getUptimeInMilliseconds()
-{
-    const int64_t kOneMillion = 1000 * 1000;
-    static mach_timebase_info_data_t s_timebase_info;
-    
-    if (s_timebase_info.denom == 0) {
-        (void) mach_timebase_info(&s_timebase_info);
-    }
-    
-    return ((mach_absolute_time() * s_timebase_info.numer) / (kOneMillion * s_timebase_info.denom));
-}
+//int64_t getUptimeInMilliseconds()
+//{
+//    const int64_t kOneMillion = 1000 * 1000;
+//    static mach_timebase_info_data_t s_timebase_info;
+//
+//    if (s_timebase_info.denom == 0) {
+//        (void) mach_timebase_info(&s_timebase_info);
+//    }
+//
+//    return ((mach_absolute_time() * s_timebase_info.numer) / (kOneMillion * s_timebase_info.denom));
+//}
 
 
 
 -(void)_test2
 {
-    int32_t cnt = 1000000;//5000000;
+    int32_t cnt = 10000;//5000000;
     int32_t mask = 1048575;//8388607;//1048575;
     
     
@@ -215,32 +232,23 @@ int64_t getUptimeInMilliseconds()
             ++i;
         }
     }
-    
-//    enumerateRBTree(tree, BTreeEnumerateTypeZ, NULL);
-//    return;
-//    [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//        NSLog(@"idx=%ld,val=%@",idx,obj);
-//    }];
+
     
 
-    NSLog(@"start===========================");
-    int64_t start = getUptimeInMilliseconds();
-    [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [self.info objectForKey:obj];
+    NSLog(@"select==========info.differ=");
+    [YZHMachTimeUtils elapsedMSTimeInBlock:^{
+        [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [self.info objectForKey:obj];
+        }];
     }];
-    int64_t end = getUptimeInMilliseconds();
-    NSLog(@"info.differ=%@",@(end - start));
     
-    start = getUptimeInMilliseconds();
-    [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        selectRBTreeWithKey(tree, [obj unsignedIntValue]);
+    NSLog(@"select==========RBtree.differ=");
+    [YZHMachTimeUtils elapsedMSTimeInBlock:^{
+        [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            selectRBTreeWithKey(tree, [obj unsignedIntValue]);
+        }];
     }];
-    end = getUptimeInMilliseconds();
-    NSLog(@"tree.differ=%@,count=%d",@(end - start),tree->count);
-    
-//    enumerateRBTree(tree, BTreeEnumerateTypeZ, NULL);
-//    enumerateRBTree(tree, BTreeEnumerateTypeLNR, NULL);
-//    enumerateRBTree(tree, BTreeEnumerateTypeRNL, NULL);
+
     
     if (tree) {
         free(tree);
@@ -248,8 +256,6 @@ int64_t getUptimeInMilliseconds()
     if (ptrNodeT) {
         free(ptrNodeT);
     }
-//    self.info = nil;
-//    self.list = nil;
 }
 
 int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
@@ -260,7 +266,6 @@ int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
 -(void)_test4
 {
     int32_t cnt = self.list.count;//1000000;//100;
-//    int32_t mask = 1048575;//127;//1048575;
     
     int32_t capcity = cnt * 0.2;//cnt * 0.2;//cnt;//1048576;//524288;//cnt;//1048576;//524288;//262144;//10;//10000;
     YZHHashMap_S *hashMap = allocHashMapWithCapacity(capcity);
@@ -273,21 +278,12 @@ int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
         insertHashMap(hashMap, &key, &value);
     }];
     
-    NSLog(@"========hashMap.cout=%d",hashMap->count);
-    
-//    print(hashMap);
-//    return ;
-    
     
     NSLog(@"start===========================");
-    int64_t start = getUptimeInMilliseconds();
     [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         [self.info objectForKey:obj];
     }];
-    int64_t end = getUptimeInMilliseconds();
-    NSLog(@"info.differ=%@",@(end - start));
     
-    start = getUptimeInMilliseconds();
     [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         int32_t val = [obj unsignedIntValue];
         T key = {.V.val = val};
@@ -298,10 +294,67 @@ int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
         }
 //        selectHashMap(hashMap, &key);
     }];
-    end = getUptimeInMilliseconds();
-    NSLog(@"hashMap.differ=%@,count=%d",@(end - start),hashMap->count);
     
     freeHashMap(hashMap);
+    self.info = nil;
+    self.list = nil;
+}
+
+void printHashTreeNode(struct HashTree *tree, struct HashTreeNode *node)
+{
+    printTreeNode(node);
+}
+
+- (void)_test5
+{
+//    int32_t cnt = (int32_t)self.list.count;
+    
+    struct HashTree hashTree;
+    memset(&hashTree, 0, sizeof(hashTree));
+    
+    struct HashTree *ptrTree = &hashTree;
+    
+//    [self.list removeAllObjects];
+//    self.list = [@[@(78),@(33),@(18),@(52),@(74),@(37),@(29),@(10),@(94),@(20),@(56),@(68)] mutableCopy];
+    
+    NSLog(@"start=====");
+    NSLog(@"=======insertInfo.Differ:");
+    [self.info removeAllObjects];
+    [YZHMachTimeUtils elapsedMSTimeInBlock:^{
+        [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [self.info setObject:obj forKey:obj];
+        }];
+    }];
+
+    NSLog(@"=======insertHashTree.Differ:");
+    [YZHMachTimeUtils elapsedMSTimeInBlock:^{
+        [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            uint32_t val = [obj unsignedIntValue];
+            T kv = {.V.val = val};
+            insertHashTree(ptrTree, &kv, &kv);
+        }];
+    }];
+    
+    NSLog(@"=======Info.differ:");
+    [YZHMachTimeUtils elapsedMSTimeInBlock:^{
+        [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [self.info objectForKey:obj];
+        }];
+    }];
+    
+    NSLog(@"=======hashTree.differ:");
+    [YZHMachTimeUtils elapsedMSTimeInBlock:^{
+        [self.list enumerateObjectsUsingBlock:^(NSNumber * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            int32_t val = [obj unsignedIntValue];
+            T key = {.V.val = val};
+            selectHashTree(ptrTree, &key);
+//            if (node->value.V.val != val) {
+//                *stop = YES;
+//                NSLog(@"node.key=%lld, val=%lld,val=%d", node->key.V.val, node->value.V.val, val);
+//            }
+        }];
+    }];
+    
     self.info = nil;
     self.list = nil;
 }
@@ -309,7 +362,8 @@ int8_t hashMapShouldAdjustFunc(struct YZHHashMap *hashMap)
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
     [self _test2];
-    [self _test4];
+//    [self _test4];
+    [self _test5];
 }
 
 
